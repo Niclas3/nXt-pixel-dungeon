@@ -1,0 +1,6 @@
+*.elf
+*.nacp
+*.nro
+*.json
+build/
+.ccls-cache/
