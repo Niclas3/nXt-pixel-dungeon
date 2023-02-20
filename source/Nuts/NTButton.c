@@ -40,23 +40,33 @@ void draw(NTButton *_self)
     // Check button state
     if (CheckCollisionPointRec(touchPoint, _self->bounds)) {
         _self->__action_state.button_state = TOUCHED;
+        // execute will touched
+        // TODO: Any desired action
+        // execute will released
+        DrawText("show when touch", 400, 420, 54, RED);
         if (_self->__action_state.fx_state == STOP) {
             PlaySound(_self->sound_effect);
             _self->__action_state.fx_state = PLAY;
         }
-        if (touch_state.count != _self->__action_state.preview_state_count) {
+        // release some touch point
+        if (touch_state.count < _self->__action_state.preview_state_count) {
             _self->__action_state.fx_state = STOP;
             _self->__action_state.preview_state_count = touch_state.count;
         }
-        // TODO: Any desired action
     } else {
-        _self->__action_state.button_state = NORMAL;
-        if (touch_state.count != _self->__action_state.preview_state_count) {
+        // release some touch point
+        if (_self->__action_state.button_state == TOUCHED &&
+            (touch_state.count < _self->__action_state.preview_state_count ||
+             touch_state.count == 0)) {
+            _self->__action_state.button_state = RELEASE;
             _self->__action_state.fx_state = STOP;
             _self->__action_state.preview_state_count = touch_state.count;
+
+        // TODO: Any desired action
+        // execute will released
+            DrawText("show after release", 400, 420, 54, BLACK);
         }
     }
-
 
     /* Calculate button frame rectangle to draw depending on button state */
     _self->rect.y = _self->__action_state.button_state * frameHeight;

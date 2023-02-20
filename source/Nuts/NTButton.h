@@ -5,7 +5,8 @@
 typedef enum __Button_State { 
     NORMAL = 0,
     TOUCHED,
-    HIGHLIGHT 
+    HIGHLIGHT,
+    RELEASE
 } Button_State;
 
 typedef enum __Sound_Effect_State {
