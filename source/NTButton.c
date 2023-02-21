@@ -39,38 +39,46 @@ void draw(NTButton *_self)
 
     // Check button state
     if (CheckCollisionPointRec(touchPoint, _self->bounds)) {
-        // execute will touched
         // TODO: Any desired action
-        // execute will released
-        /* if (_self->__action_state.button_state != TOUCHED) { */
-            DrawText("show when touch", 400, 420, 54, RED);
-            _self->__action_state.button_state = TOUCHED;
-        /* } */
+        // Execute when released
+        DrawText("show when touch", 400, 420, 54, RED);
+        _self->__action_state.button_state = TOUCHED;
 
         if (_self->__action_state.fx_state == STOP) {
             PlaySound(_self->sound_effect);
             _self->__action_state.fx_state = PLAY;
+        } else {
+            // state is played
         }
-        // release some touch point
-        if (touch_state.count < _self->__action_state.preview_state_count) {
-            _self->__action_state.fx_state = STOP;
-            _self->__action_state.preview_state_count = touch_state.count;
-            _self->__action_state.button_state = RELEASE;
-        }
-    } else {
-        // release some touch point
-        if (_self->__action_state.button_state == TOUCHED &&
-            (touch_state.count < _self->__action_state.preview_state_count ||
-             touch_state.count == 0)) {
-            _self->__action_state.button_state = RELEASE;
-            _self->__action_state.fx_state = STOP;
-            _self->__action_state.preview_state_count = touch_state.count;
 
+    } else {
+        // Release after touch
+        // Touched but not in range of actived area
+        Button_State button_state = _self->__action_state.button_state;
+
+        if ((button_state == TOUCHED) && touch_state.count != 0) {
             // TODO: Any desired action
-            // execute will released
-            DrawText("show after release", 400, 420, 54, BLACK);
+            // Still execute will released out of button range
+            _self->__action_state.button_state = BS_OUT_OF_RANGE;
+        } else if (button_state == TOUCHED) {
+            //when Touch then release
+            DrawText("release after touch", 400, 420, 54, BLACK);
+        } else if (button_state == BS_OUT_OF_RANGE){
+            if (touch_state.count == 0)
+                //when Touch then move out of range then release
+                DrawText("show after release out of button range", 400, 420, 54, BLACK);
+        } else {
+            // In state == NORMAL / RELEASE / HIGHLIHGT
         }
+
+        if (touch_state.count <= 0) {
+            _self->__action_state.button_state = RELEASE;
+        } else {
+            // more than one touch
+        }
+        _self->__action_state.fx_state = STOP;
     }
+
 
     /* Calculate button frame rectangle to draw depending on button state */
     _self->rect.y = _self->__action_state.button_state * frameHeight;

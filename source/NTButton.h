@@ -5,6 +5,7 @@
 #include <switch.h>
 
 typedef enum __Button_State { 
+    BS_OUT_OF_RANGE=-1,
     NORMAL = 0,
     TOUCHED,
     HIGHLIGHT,
