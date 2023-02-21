@@ -13,11 +13,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <switch.h>
-#include "NTButton.h"
+
 #include "raylib.h"
 
-#define FPS 60
+#include "NTButton.h"
+#include "config.h"
 
+#define NUM_FRAMES 3
 int main(void)
 {
     // Init the gamepad for reading all controllers

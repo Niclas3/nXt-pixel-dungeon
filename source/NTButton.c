@@ -32,6 +32,7 @@ void draw(NTButton *_self)
     Vector2 touchPoint = {0.0f, 0.0f};
 
     hidGetTouchScreenStates(&touch_state, 1);
+    // Only load the newset touch point
     if (touch_state.count != 0) {
         touchPoint.x = touch_state.touches[touch_state.count - 1].x;
         touchPoint.y = touch_state.touches[touch_state.count - 1].y;
@@ -56,29 +57,25 @@ void draw(NTButton *_self)
         // Touched but not in range of actived area
         Button_State button_state = _self->__action_state.button_state;
 
-        if ((button_state == TOUCHED) && touch_state.count != 0) {
+        if ((button_state == TOUCHED) && touch_state.count == 1) {
             // TODO: Any desired action
             // Still execute will released out of button range
             _self->__action_state.button_state = BS_OUT_OF_RANGE;
-        } else if (button_state == TOUCHED) {
-            //when Touch then release
+        } else if (button_state == TOUCHED && touch_state.count == 0) {
+            // when Touch then release
             DrawText("release after touch", 400, 420, 54, BLACK);
-        } else if (button_state == BS_OUT_OF_RANGE){
+        } else if (button_state == BS_OUT_OF_RANGE) {
             if (touch_state.count == 0)
-                //when Touch then move out of range then release
-                DrawText("show after release out of button range", 400, 420, 54, BLACK);
+                // when Touch then move out of range then release
+                DrawText("show after release out of button range", 400, 420, 54,
+                         BLACK);
         } else {
             // In state == NORMAL / RELEASE / HIGHLIHGT
         }
 
-        if (touch_state.count <= 0) {
-            _self->__action_state.button_state = RELEASE;
-        } else {
-            // more than one touch
-        }
+        _self->__action_state.button_state = RELEASE;
         _self->__action_state.fx_state = STOP;
     }
-
 
     /* Calculate button frame rectangle to draw depending on button state */
     _self->rect.y = _self->__action_state.button_state * frameHeight;
