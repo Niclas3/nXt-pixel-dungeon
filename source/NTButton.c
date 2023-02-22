@@ -42,7 +42,16 @@ void draw(NTButton *_self)
     if (CheckCollisionPointRec(touchPoint, _self->bounds)) {
         // TODO: Any desired action
         // Execute when released
-        DrawText("show when touch", 400, 420, 54, RED);
+        NTEvent event = {
+            .message = TextFormat("my name is %s", _self->title)
+        };
+        NTEvent *event_ptr = &event;
+        if(_self->action){
+            _self->action(event_ptr);
+        }else{
+            DrawText("this button do not have action", 400, 420, 54, RED);
+        }
+
         _self->__action_state.button_state = TOUCHED;
 
         if (_self->__action_state.fx_state == STOP) {
@@ -63,12 +72,13 @@ void draw(NTButton *_self)
             _self->__action_state.button_state = BS_OUT_OF_RANGE;
         } else if (button_state == TOUCHED && touch_state.count == 0) {
             // when Touch then release
-            DrawText("release after touch", 400, 420, 54, BLACK);
+            if(_self->action_when_release){
+                DrawText("release after touch", 400, 420, 54, BLACK);
+            }
         } else if (button_state == BS_OUT_OF_RANGE) {
             if (touch_state.count == 0)
                 // when Touch then move out of range then release
-                DrawText("show after release out of button range", 400, 420, 54,
-                         BLACK);
+                DrawText("show after release out of button range", 400, 420, 54, BLACK);
         } else {
             // In state == NORMAL / RELEASE / HIGHLIHGT
         }

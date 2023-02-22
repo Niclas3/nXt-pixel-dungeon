@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include <switch.h>
 
+#include "NTEvent.h"
 typedef enum __Button_State { 
     BS_OUT_OF_RANGE=-1,
     NORMAL = 0,
@@ -27,11 +28,12 @@ typedef struct __Action_State {
 //Load resources
 
 //Init a button 
-//@param1 Texture2D resource
-//@param2 Rectangle rect   rect of button
-//@param3 Rectangle bounds
-//@param4 Callback callback
-//@param5 Sound sound_effect
+//@skin Texture2D resource
+//@rect Rectangle rect   rect of button
+//@bounds Rectangle bounds
+//@sound_effectsound_effect
+//@action Callback callback
+
 typedef struct __NTButton {
     Texture2D skin;
     Rectangle rect;
@@ -39,6 +41,8 @@ typedef struct __NTButton {
     Sound sound_effect;
     char *title;
     void (*draw)(struct __NTButton *);
+    void (*action)(NTEvent *event);
+    void (*action_when_release)(NTEvent *event);
     Action_State __action_state; // inner state
     // SEL *action;
 }NTButton;
