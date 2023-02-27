@@ -1,11 +1,13 @@
-#include "NTButton.h"
 #include <stdlib.h>
+#include "NTTools.h"
+#include "NTButton.h"
 
-
+/* extern Vector2 NTGetTextWidth(Font f, int size, char* text ); */
 NTButton *initButtonWith(Texture2D skin,
                          Rectangle rect,
                          Rectangle bounds,
                          Sound fx_effect,
+                         Font font,
                          char *title)
 {
     /* NTButton *button = MemAlloc( sizeof(NTButton) ); */
@@ -19,6 +21,7 @@ NTButton *initButtonWith(Texture2D skin,
     _self->title = title;
     _self->draw = draw;
     _self->__action_state = inner_state;
+    _self->font = font;
     return _self;
 }
 
@@ -38,17 +41,16 @@ void draw(NTButton *_self)
         touchPoint.y = touch_state.touches[touch_state.count - 1].y;
     }
 
-    // Check button state
+    // Action
     if (CheckCollisionPointRec(touchPoint, _self->bounds)) {
         // TODO: Any desired action
         // Execute when released
         NTEvent event = {
-            .message = TextFormat("my name is %s", _self->title)
-        };
+            .message = (char *) TextFormat("my name is %s", _self->title)};
         NTEvent *event_ptr = &event;
-        if(_self->action){
+        if (_self->action) {
             _self->action(event_ptr);
-        }else{
+        } else {
             DrawText("this button do not have action", 400, 420, 54, RED);
         }
 
@@ -72,13 +74,14 @@ void draw(NTButton *_self)
             _self->__action_state.button_state = BS_OUT_OF_RANGE;
         } else if (button_state == TOUCHED && touch_state.count == 0) {
             // when Touch then release
-            if(_self->action_when_release){
+            if (_self->action_when_release) {
                 DrawText("release after touch", 400, 420, 54, BLACK);
             }
         } else if (button_state == BS_OUT_OF_RANGE) {
             if (touch_state.count == 0)
                 // when Touch then move out of range then release
-                DrawText("show after release out of button range", 400, 420, 54, BLACK);
+                DrawText("show after release out of button range", 400, 420, 54,
+                         BLACK);
         } else {
             // In state == NORMAL / RELEASE / HIGHLIHGT
         }
@@ -90,6 +93,17 @@ void draw(NTButton *_self)
     /* Calculate button frame rectangle to draw depending on button state */
     _self->rect.y = _self->__action_state.button_state * frameHeight;
 
+    Vector2 title_rect = NTGetTextWidth(_self->font, _self->font.baseSize , _self->title);
     DrawTextureRec(_self->skin, _self->rect,
                    (Vector2){_self->bounds.x, _self->bounds.y}, WHITE);
+    //TODO: show icons
+
+
+    // show title
+    DrawTextEx(
+        _self->font, _self->title,
+        (Vector2){
+            _self->bounds.x + _self->rect.width / 2 - (title_rect.x / 2),
+            _self->bounds.y + _self->rect.height / 2 - (title_rect.y / 2)},
+        _self->font.baseSize, 1, WHITE);
 }

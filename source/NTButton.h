@@ -29,16 +29,20 @@ typedef struct __Action_State {
 
 //Init a button 
 //@skin Texture2D resource
+//@icon icon of button
 //@rect Rectangle rect   rect of button
 //@bounds Rectangle bounds
 //@sound_effectsound_effect
-//@action Callback callback
+//@action action when press button
+//@action_when_release action when release after press
 
 typedef struct __NTButton {
     Texture2D skin;
+    Texture2D icon;
     Rectangle rect;
     Rectangle bounds;
     Sound sound_effect;
+    Font font;
     char *title;
     void (*draw)(struct __NTButton *);
     void (*action)(NTEvent *event);
@@ -47,14 +51,15 @@ typedef struct __NTButton {
     // SEL *action;
 }NTButton;
 
-
 //Init a Button
 NTButton* initButtonWith(Texture2D skin,
                 Rectangle rect,
                 Rectangle bounds,
                 Sound fx_effect,
+                Font font,
                 char *title);
 
+//TODO:
 NTButton* initButton();
 
 // Draw a button
