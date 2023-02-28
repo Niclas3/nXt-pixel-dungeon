@@ -1,6 +1,6 @@
+#include "NTButton.h"
 #include <stdlib.h>
 #include "NTTools.h"
-#include "NTButton.h"
 
 /* extern Vector2 NTGetTextWidth(Font f, int size, char* text ); */
 NTButton *initButtonWith(Texture2D skin,

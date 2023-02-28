@@ -30,10 +30,11 @@ float NTGetTextWidthtx(Font used_font, int font_size, char *text)
                 padding /* (float) GuiGetStyle(DEFAULT, TEXT_SPACING) */;
         else
             glyphWidth = ((float) used_font.glyphs[codepointIndex].advanceX *
-                              scaleFactor + padding);
+                              scaleFactor +
+                          padding);
 
         /* text_rect.x += glyphWidth; */
-        allWidth +=glyphWidth;
+        allWidth += glyphWidth;
     }
 
     text_rect.x = allWidth;
@@ -67,10 +68,24 @@ Vector2 NTGetTextWidth(Font used_font, int font_size, char *text)
                 padding /* (float) GuiGetStyle(DEFAULT, TEXT_SPACING) */;
         else
             glyphWidth = ((float) used_font.glyphs[codepointIndex].advanceX *
-                              scaleFactor + padding);
+                              scaleFactor +
+                          padding);
 
         text_rect.x += glyphWidth;
     }
 
     return text_rect;
+}
+
+
+void NTDrawTexture(Texture2D texture, Rectangle pick_window, Rectangle dest)
+{
+    Vector2 source = (Vector2){0.0, 0.0};
+    NPatchInfo ninfo = {pick_window,  // what you want to get
+                        0,            // left
+                        0,            // top
+                        0,            // right
+                        0,            // bottom
+                        NPATCH_NINE_PATCH};
+    DrawTextureNPatch(texture, ninfo, dest, source, 0.0, WHITE);
 }
