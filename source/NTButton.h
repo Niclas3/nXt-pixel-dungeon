@@ -40,7 +40,6 @@ typedef struct __NTButton {
     Texture2D skin;
     Texture2D icon;
     Rectangle rect;
-    Rectangle bounds;
     Sound sound_effect;
     Font font;
     char *title;
@@ -54,7 +53,6 @@ typedef struct __NTButton {
 //Init a Button
 NTButton* initButtonWith(Texture2D skin,
                 Rectangle rect,
-                Rectangle bounds,
                 Sound fx_effect,
                 Font font,
                 char *title);
