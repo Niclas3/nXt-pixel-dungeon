@@ -1,9 +1,8 @@
-#include <stdlib.h>
-#include "../NTDebug.h"
 #include "NTTools.h"
+#include "NTDebug.h"
 #include "NTButton.h"
+#include <stdlib.h>
 
-/* extern Vector2 NTGetTextWidth(Font f, int size, char* text ); */
 NTButton *initButtonWith(Texture2D skin,
                          Rectangle rect,
                          Sound fx_effect,
@@ -39,16 +38,14 @@ void _draw_skin(Texture2D chrome,
     float dest_width = dest_rect.width;
     float dest_height = dest_rect.height;
 
-    float border_rate = 3;
-
-
-    Rectangle window = {x_zero_point,  // x
-                        y_zero_point,  // y
-                        3,             // width
-                        3};            // height
+    Rectangle window = {.x = x_zero_point,  // x
+                        .y = y_zero_point,  // y
+                        .width = 3,             // width
+                        .height = 3};            // height
 
     Rectangle but_dest = {dest_x_zero_point, dest_y_zero_point,
                           window.width * rate, window.height * rate};
+    Vector2 allwh= {0};
 
     // Top-left
     window.x = x_zero_point;
@@ -64,10 +61,15 @@ void _draw_skin(Texture2D chrome,
 
     but_dest.x = dest_x_zero_point;
     but_dest.y = dest_y_zero_point;
+
     but_dest.x += window.width * rate;
 
-    but_dest.width += dest_width * rate;
+    but_dest.width = dest_width * rate;
     but_dest.height = window.height * rate;
+
+
+    allwh.x += but_dest.width;
+    allwh.y += but_dest.height;
     NTDrawTexture(chrome, window, but_dest);
     // top-right
     window.x = x_zero_point;
@@ -76,7 +78,7 @@ void _draw_skin(Texture2D chrome,
 
     but_dest.x = dest_x_zero_point;
     but_dest.y = dest_y_zero_point;
-    but_dest.x += (window.width * 2 + dest_width) * rate;
+    but_dest.x += (window.width + dest_width) * rate;
     but_dest.width = window.width * rate;
     but_dest.height = window.height * rate;
 
@@ -92,10 +94,9 @@ void _draw_skin(Texture2D chrome,
     but_dest.y += window.height * rate;
 
     but_dest.width = window.width * rate;
-    but_dest.height = dest_height + window.height * rate;
+    but_dest.height = dest_height * rate;
+
     NTDrawTexture(chrome, window, but_dest);
-
-
     // centre
     window.x = x_zero_point;
     window.y = y_zero_point;
@@ -107,11 +108,9 @@ void _draw_skin(Texture2D chrome,
     but_dest.x += window.width * rate;
     but_dest.y += window.height * rate;
 
-    but_dest.width = window.width * rate;
-    but_dest.height = window.height * rate;
+    but_dest.width = dest_width * rate;
+    but_dest.height = dest_height * rate;
 
-    but_dest.width += dest_width * rate;
-    but_dest.height = dest_height + window.height * rate;
     NTDrawTexture(chrome, window, but_dest);
 
     // mid-right
@@ -123,11 +122,11 @@ void _draw_skin(Texture2D chrome,
     but_dest.x = dest_x_zero_point;
     but_dest.y = dest_y_zero_point;
 
-    but_dest.x += (window.width * 2 + dest_width) * rate;
+    but_dest.x += (window.width + dest_width) * rate;
     but_dest.y += window.height * rate;
 
     but_dest.width = window.width * rate;
-    but_dest.height = dest_height + window.height * rate;
+    but_dest.height = dest_height * rate;
 
     NTDrawTexture(chrome, window, but_dest);
 
@@ -139,7 +138,7 @@ void _draw_skin(Texture2D chrome,
     but_dest.x = dest_x_zero_point;
     but_dest.y = dest_y_zero_point;
 
-    but_dest.y += (2 * window.height * rate + dest_height);
+    but_dest.y += (window.height + dest_height) * rate ;
     but_dest.width = window.width * rate;
     but_dest.height = window.height * rate;
 
@@ -153,11 +152,10 @@ void _draw_skin(Texture2D chrome,
     but_dest.x = dest_x_zero_point;
     but_dest.y = dest_y_zero_point;
     but_dest.x += window.width * rate;
-    but_dest.y += (2 * window.height * rate + dest_height);
+    but_dest.y += (window.height + dest_height) * rate;
 
     but_dest.height = window.height * rate;
-    but_dest.width = window.width * rate;
-    but_dest.width += dest_width * rate;
+    but_dest.width = (window.width + dest_width) * rate;
 
     NTDrawTexture(chrome, window, but_dest);
 
@@ -170,12 +168,18 @@ void _draw_skin(Texture2D chrome,
     but_dest.x = dest_x_zero_point;
     but_dest.y = dest_y_zero_point;
 
-    but_dest.x += (window.width * 2 + dest_width) * rate;
-    but_dest.y += (window.height * 2 * rate + dest_height);
+    but_dest.x += (window.width  + dest_width) * rate;
+    but_dest.y += (window.height + dest_height) * rate;
 
     but_dest.height = window.height * rate;
     but_dest.width = window.width * rate;
+
     NTDrawTexture(chrome, window, but_dest);
+
+    float width = window.width * rate + dest_width * rate + window.width * rate;
+    float height = window.height * rate +dest_height + window.height * rate ;
+    allwh.x = width;
+    allwh.y = height;
 }
 
 void draw(NTButton *_self)
@@ -190,16 +194,18 @@ void draw(NTButton *_self)
         touchPoint.x = touch_state.touches[touch_state.count - 1].x;
         touchPoint.y = touch_state.touches[touch_state.count - 1].y;
     }
-    Rectangle rect = {.width = (_self->rect.width + 3 * 2) * scale_rate,
-                      .height = (_self->rect.height+ 3 * 2) * scale_rate,
+
+    Rectangle touch_rect = {.width = (_self->rect.width + 3 * 2) * scale_rate,
+                      .height = (_self->rect.height + 3 * 2) * scale_rate,
                       .x = _self->rect.x,
                       .y = _self->rect.y};
 
     // Action
-    /* if (CheckCollisionPointRec(touchPoint, _self->rect)) { */
-    if (CheckCollisionPointRec(touchPoint, rect)) {
+    if (CheckCollisionPointRec(touchPoint, touch_rect)) {
+        /* if (CheckCollisionPointRec(touchPoint, rect)) { */
         // TODO: Any desired action
         // Execute when released
+        DrawLine(touchPoint.x, 0, touchPoint.x, 1000, GREEN);
         NTEvent event = {
             .message = (char *) TextFormat("my name is %s", _self->title)};
         NTEvent *event_ptr = &event;
@@ -248,7 +254,7 @@ void draw(NTButton *_self)
     /* Texture2D chrome= LoadTexture( */
     /*     "romfs:/assets/interfaces/chrome.png");  // Load button texture */
     Vector2 title_rect =
-        NTGetTextWidth(_self->font, _self->font.baseSize, _self->title);
+        NTGetTextWidth(_self->font, _self->font.baseSize / 2, _self->title);
     /* NTDrawTexture(chrome, */
     /*         (Rectangle){20,0,9,9}, */
     /*         (Rectangle){_self->rect.x, */
@@ -268,7 +274,7 @@ void draw(NTButton *_self)
     // show title
     DrawTextEx(
         _self->font, _self->title,
-        (Vector2){_self->rect.x + _self->rect.width / 2 - (title_rect.x / 2),
-                  _self->rect.y + _self->rect.height / 2 - (title_rect.y / 2)},
-        _self->font.baseSize, 1, WHITE);
+        (Vector2){_self->rect.x + touch_rect.width / 2 - (title_rect.x / 2),
+                  _self->rect.y + touch_rect.height/ 2 - (title_rect.y / 2)},
+        _self->font.baseSize / 2, 1, YELLOW);
 }
