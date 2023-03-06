@@ -186,7 +186,7 @@ void draw(NTButton *_self)
 {
     HidTouchScreenState touch_state = {0};
     Vector2 touchPoint = {0.0f, 0.0f};
-    int scale_rate = 10;  // rate of skin
+    int scale_rate = 4;  // rate of skin
 
     hidGetTouchScreenStates(&touch_state, 1);
     // Only load the newset touch point
@@ -251,10 +251,14 @@ void draw(NTButton *_self)
         _self->__action_state.fx_state = STOP;
     }
 
-    /* Texture2D chrome= LoadTexture( */
-    /*     "romfs:/assets/interfaces/chrome.png");  // Load button texture */
     Vector2 title_rect =
         NTGetTextWidth(_self->font, _self->font.baseSize / 2, _self->title);
+
+    Vector2 pick_pos = {20.0, 0.0}; // normal button pick position
+
+    _draw_skin(_self->skin, scale_rate, pick_pos, _self->rect);
+
+    // TODO: show icons
     /* NTDrawTexture(chrome, */
     /*         (Rectangle){20,0,9,9}, */
     /*         (Rectangle){_self->rect.x, */
@@ -265,16 +269,14 @@ void draw(NTButton *_self)
     /* DrawTextureRec(_self->skin, _self->rect, */
     /*                (Vector2){_self->rect.x, _self->rect.y}, WHITE); */
 
-    Vector2 pick_pos = {20.0, 0.0};
-
-    _draw_skin(_self->skin, scale_rate, pick_pos, _self->rect);
-
-    // TODO: show icons
-
     // show title
-    DrawTextEx(
-        _self->font, _self->title,
-        (Vector2){_self->rect.x + touch_rect.width / 2 - (title_rect.x / 2),
-                  _self->rect.y + touch_rect.height/ 2 - (title_rect.y / 2)},
-        _self->font.baseSize / 2, 1, YELLOW);
+
+    int title_x = _self->rect.x + touch_rect.width /2;
+    int title_y = _self->rect.y + touch_rect.height /2;
+
+    DrawTextEx( _self->font, _self->title,
+        (Vector2){title_x - (title_rect.x / 2),
+                  title_y -(title_rect.y / 2)},
+        _self->font.baseSize / 2, 1, PURPLE);
+
 }
