@@ -1,29 +1,35 @@
-#include "NTTools.h"
-#include "NTDebug.h"
 #include "NTButton.h"
 #include <stdlib.h>
+#include "NTDebug.h"
+#include "NTTools.h"
 
 NTButton *initButtonWith(Texture2D skin,
+                         Texture2D icon,
                          Rectangle rect,
                          Sound fx_effect,
                          Font font,
+                         int font_size,
                          char *title)
 {
-    /* NTButton *button = MemAlloc( sizeof(NTButton) ); */
     NTButton *_self = MemAlloc(sizeof(NTButton));
     Action_State inner_state = {
         .fx_state = STOP, .preview_state_count = 0, .button_state = NORMAL};
     _self->skin = skin;
+    _self->icon = icon;
     _self->rect = rect;
     _self->sound_effect = fx_effect;
     _self->title = title;
     _self->draw = draw;
     _self->__action_state = inner_state;
     _self->font = font;
+    _self->font_size = font_size;
     return _self;
 }
 
-void destory() {}
+void destoryButton(NTButton *btn)
+{
+    MemFree(btn);
+}
 
 void _draw_skin(Texture2D chrome,
                 float rate,
@@ -40,12 +46,11 @@ void _draw_skin(Texture2D chrome,
 
     Rectangle window = {.x = x_zero_point,  // x
                         .y = y_zero_point,  // y
-                        .width = 3,             // width
-                        .height = 3};            // height
+                        .width = 3,         // width
+                        .height = 3};       // height
 
     Rectangle but_dest = {dest_x_zero_point, dest_y_zero_point,
                           window.width * rate, window.height * rate};
-    Vector2 allwh= {0};
 
     // Top-left
     window.x = x_zero_point;
@@ -68,8 +73,6 @@ void _draw_skin(Texture2D chrome,
     but_dest.height = window.height * rate;
 
 
-    allwh.x += but_dest.width;
-    allwh.y += but_dest.height;
     NTDrawTexture(chrome, window, but_dest);
     // top-right
     window.x = x_zero_point;
@@ -138,7 +141,7 @@ void _draw_skin(Texture2D chrome,
     but_dest.x = dest_x_zero_point;
     but_dest.y = dest_y_zero_point;
 
-    but_dest.y += (window.height + dest_height) * rate ;
+    but_dest.y += (window.height + dest_height) * rate;
     but_dest.width = window.width * rate;
     but_dest.height = window.height * rate;
 
@@ -168,25 +171,20 @@ void _draw_skin(Texture2D chrome,
     but_dest.x = dest_x_zero_point;
     but_dest.y = dest_y_zero_point;
 
-    but_dest.x += (window.width  + dest_width) * rate;
+    but_dest.x += (window.width + dest_width) * rate;
     but_dest.y += (window.height + dest_height) * rate;
 
     but_dest.height = window.height * rate;
     but_dest.width = window.width * rate;
 
     NTDrawTexture(chrome, window, but_dest);
-
-    float width = window.width * rate + dest_width * rate + window.width * rate;
-    float height = window.height * rate +dest_height + window.height * rate ;
-    allwh.x = width;
-    allwh.y = height;
 }
 
 void draw(NTButton *_self)
 {
     HidTouchScreenState touch_state = {0};
     Vector2 touchPoint = {0.0f, 0.0f};
-    int scale_rate = 4;  // rate of skin
+    int scale_rate = 1;  // rate of skin
 
     hidGetTouchScreenStates(&touch_state, 1);
     // Only load the newset touch point
@@ -196,23 +194,21 @@ void draw(NTButton *_self)
     }
 
     Rectangle touch_rect = {.width = (_self->rect.width + 3 * 2) * scale_rate,
-                      .height = (_self->rect.height + 3 * 2) * scale_rate,
-                      .x = _self->rect.x,
-                      .y = _self->rect.y};
+                            .height = (_self->rect.height + 3 * 2) * scale_rate,
+                            .x = _self->rect.x,
+                            .y = _self->rect.y};
 
     // Action
     if (CheckCollisionPointRec(touchPoint, touch_rect)) {
-        /* if (CheckCollisionPointRec(touchPoint, rect)) { */
         // TODO: Any desired action
         // Execute when released
-        DrawLine(touchPoint.x, 0, touchPoint.x, 1000, GREEN);
         NTEvent event = {
             .message = (char *) TextFormat("my name is %s", _self->title)};
         NTEvent *event_ptr = &event;
         if (_self->action) {
             _self->action(event_ptr);
         } else {
-            DrawText("this button do not have action", 400, 420, 54, RED);
+            /* DrawText("this button do not have action", 400, 420, 54, RED); */
         }
 
         _self->__action_state.button_state = TOUCHED;
@@ -236,7 +232,10 @@ void draw(NTButton *_self)
         } else if (button_state == TOUCHED && touch_state.count == 0) {
             // when Touch then release
             if (_self->action_when_release) {
-                DrawText("release after touch", 400, 420, 54, BLACK);
+                NTEvent event = {.message = (char *) TextFormat("release","ad")};
+                NTEvent *event_ptr = &event;
+                _self->action_when_release(event_ptr);
+                /* DrawText("release after touch", 400, 420, 54, BLACK); */
             }
         } else if (button_state == BS_OUT_OF_RANGE) {
             if (touch_state.count == 0)
@@ -251,32 +250,35 @@ void draw(NTButton *_self)
         _self->__action_state.fx_state = STOP;
     }
 
-    Vector2 title_rect =
-        NTGetTextWidth(_self->font, _self->font.baseSize / 2, _self->title);
+    int font_size = _self->font_size;  //_self->font.baseSize;
+    Vector2 title_rect = NTGetTextWidth(_self->font, font_size, _self->title);
 
-    Vector2 pick_pos = {20.0, 0.0}; // normal button pick position
+    Vector2 pick_pos = {20.0, 0.0};       // normal button pick position
+    Vector2 normal_pos = {20.0, 9.0};     // normal button pick position
+    Vector2 highlight_pos = {29.0, 0.0};  // high light button pick position
 
-    _draw_skin(_self->skin, scale_rate, pick_pos, _self->rect);
+    if (_self->__action_state.button_state == TOUCHED) {
+        _draw_skin(_self->skin, scale_rate, normal_pos, _self->rect);
+    } else if (_self->__action_state.button_state == HIGHLIGHT) {
+        _draw_skin(_self->skin, scale_rate, highlight_pos, _self->rect);
+    } else {
+        _draw_skin(_self->skin, scale_rate, pick_pos, _self->rect);
+    }
 
     // TODO: show icons
-    /* NTDrawTexture(chrome, */
-    /*         (Rectangle){20,0,9,9}, */
+    /* NTDrawTexture(_self->icon, */
+    /*         (Rectangle){0,0,9,9}, */
     /*         (Rectangle){_self->rect.x, */
     /*                     _self->rect.y, */
-    /*                     90, //width */
-    /*                     90}); //height */
-
-    /* DrawTextureRec(_self->skin, _self->rect, */
-    /*                (Vector2){_self->rect.x, _self->rect.y}, WHITE); */
+    /*                     _self->rect.width, //width */
+    /*                     _self->rect.height}); //height */
 
     // show title
+    int title_x = _self->rect.x + touch_rect.width / 2;
+    int title_y = _self->rect.y + touch_rect.height / 2;
 
-    int title_x = _self->rect.x + touch_rect.width /2;
-    int title_y = _self->rect.y + touch_rect.height /2;
-
-    DrawTextEx( _self->font, _self->title,
-        (Vector2){title_x - (title_rect.x / 2),
-                  title_y -(title_rect.y / 2)},
-        _self->font.baseSize / 2, 1, PURPLE);
-
+    DrawTextEx(
+        _self->font, _self->title,
+        (Vector2){title_x - (title_rect.x / 2), title_y - (title_rect.y / 2)},
+        font_size, 1, WHITE);
 }
