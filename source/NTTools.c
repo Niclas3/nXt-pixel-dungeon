@@ -1,4 +1,7 @@
 #include "NTTools.h"
+#include <math.h>
+#include <time.h>
+#include <stdlib.h>
 
 #define MAX_LINE_BUFFER_SIZE 45
 
@@ -42,7 +45,6 @@ Vector2 NTGetTextWidth(Font used_font, int font_size, char *text)
                                                           // text
 }
 
-
 void NTDrawTexture(Texture2D texture, Rectangle pick_window, Rectangle dest)
 {
     Vector2 source = (Vector2){0.0, 0.0};
@@ -53,4 +55,10 @@ void NTDrawTexture(Texture2D texture, Rectangle pick_window, Rectangle dest)
                         0,            // bottom
                         NPATCH_NINE_PATCH};
     DrawTextureNPatch(texture, ninfo, dest, source, 0.0, WHITE);
+}
+
+int NTGetRandomValue(int min, int max)
+{
+    srand((unsigned) time(NULL));
+    return (rand() % (abs(max- min) + 1)) + min;
 }
