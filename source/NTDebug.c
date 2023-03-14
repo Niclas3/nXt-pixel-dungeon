@@ -6,6 +6,7 @@
 
 void ShowRectInfo(Rectangle rect1)
 {
+    DrawRectangleRec(rect1, BLUE);
     DrawText(TextFormat("x:%f y:%f w:%f h:%f", rect1.x, rect1.y, rect1.width,
                         rect1.height),
              200, 539, 20, RED);
@@ -13,7 +14,10 @@ void ShowRectInfo(Rectangle rect1)
 
 void ShowVector2Info(Vector2 v)
 {
-    DrawText(TextFormat("x:%f y:%f", v.x, v.y), 200, 560, 20, GREEN);
+    char* text =TextFormat("x:%f y:%f", v.x, v.y);
+    Vector2 t_Hw = MeasureTextEx(GetFontDefault(), text, 20, 2);
+    DrawRectangle(200, 560, t_Hw.x, t_Hw.y, ORANGE);
+    DrawText(text, 200, 560, 20, GREEN);
 }
 
 void ShowRuler(bool is_h)
