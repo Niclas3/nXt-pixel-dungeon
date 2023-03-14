@@ -4,7 +4,10 @@
 
 #include "NTAssets.h"
 #include "NTButton.h"
+#include "NTDungeon.h"
+
 #include "NTDebug.h"
+
 #include "NTRectF.h"
 #include "NTTools.h"
 #include "config.h"
@@ -65,7 +68,6 @@ int main(void)
     const int screenWidth = 1280;
     const int screenHeight = 720;
 
-
     InitWindow(screenWidth, screenHeight, "nXt pixel dungeon");
 
     InitAudioDevice();
@@ -76,15 +78,15 @@ int main(void)
     // is required)
 
     Texture2D mage = LoadTexture("romfs:/assets/sprites/mage.png");
+    Texture2D swers_cell =
+        LoadTexture(NTGetAssertPath(asset_environment.TILES_SEWERS));
 
-    Font global_font =
-        LoadFont(TextFormat("romfs:/assets/%s", asset_fonts.PIXELFONT));
-    Music theme1 =
-        LoadMusicStream(TextFormat("romfs:/assets/%s", asset_music.THEME_1));
+    Font global_font = LoadFont(NTGetAssertPath(asset_fonts.PIXELFONT));
+    Music theme1 = LoadMusicStream(NTGetAssertPath(asset_music.THEME_1));
     Texture2D chrome = LoadTexture(
         NTGetAssertPath(asset_interfaces.CHROME));  // Load button texture
-    Texture2D icons = LoadTexture(TextFormat(
-        "romfs:/assets/%s", asset_interfaces.ICONS));  // Load button texture
+    Texture2D icons = LoadTexture(
+        NTGetAssertPath(asset_interfaces.ICONS));  // Load button texture
 
     Sound fx_click = LoadSound("romfs:/assets/sounds/click.mp3");
 
@@ -149,10 +151,12 @@ int main(void)
         case LOGO: {
             // TODO: Update LOGO screen variables here!
 
-            frame_count++;  // Count frames
-
             // Wait for 2 seconds (120 frames) before jumping to TITLE screen
-            if (frame_count > 120) {
+            /* if (frame_count > 120) { */
+            /*     current_screen = TITLE; */
+            /* } */
+
+            if (kDown & HidNpadButton_A) {
                 current_screen = TITLE;
             }
         } break;
@@ -186,7 +190,7 @@ int main(void)
             break;
         }
 
-
+        // Init texture at while for
         Texture2D background =
             LoadTexture("romfs:/assets/interfaces/arcs1.png");
         Texture2D foreground =
@@ -202,6 +206,12 @@ int main(void)
             // TODO: Draw LOGO screen here!
             DrawText("LOGO SCREEN", 20, 20, 40, LIGHTGRAY);
             DrawText("WAIT for 2 SECONDS...", 290, 220, 20, GRAY);
+            CreateDungeon();
+
+            /* Vector2 v_start = (Vector2){.x= (2.0 / 3.0) * (float)GetScreenWidth(), .y=0}; */
+            /* Vector2 v_end   = (Vector2){.x= (2.0 / 3.0) * (float)GetScreenWidth(), .y=(float)GetScreenHeight()}; */
+            /* DrawLineEx( v_start,v_end, 4.0, BLACK); */
+            /* DrawTexture(swers_cell, 200, 200, WHITE); */
 
         } break;
         case TITLE: {
@@ -215,10 +225,11 @@ int main(void)
         } break;
         case GAMEPLAY: {
             // TODO: Draw GAMEPLAY screen here!
-            DrawRectangle(0, 0, screenWidth, screenHeight, PURPLE);
-            DrawText("GAMEPLAY SCREEN", 20, 20, 40, MAROON);
-            DrawText("PRESS ENTER or TAP to JUMP to ENDING SCREEN", 130, 220,
-                     20, MAROON);
+            /* DrawRectangle(0, 0, screenWidth, screenHeight, PURPLE); */
+            CreateDungeon();
+            /* DrawText("GAMEPLAY SCREEN", 20, 20, 40, MAROON); */
+            /* DrawText("PRESS ENTER or TAP to JUMP to ENDING SCREEN", 130, 220, */
+            /*          20, MAROON); */
         } break;
         case ENDING: {
             // TODO: Draw ENDING screen here!
@@ -243,6 +254,8 @@ int main(void)
     UnloadMusicStream(theme1);
     UnloadTexture(icons);
     UnloadTexture(chrome);
+
+    UnloadTexture(swers_cell);
 
     UnloadFont(global_font);
 
