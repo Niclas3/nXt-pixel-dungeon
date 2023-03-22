@@ -1,9 +1,11 @@
 #include "NTTools.h"
 #include <math.h>
-#include <time.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define MAX_LINE_BUFFER_SIZE 45
+
+typedef enum{NTPOS, NTRECT} R2VTYPE;
 
 Vector2 NTGetTextWidthtx(Font used_font, int font_size, char *text)
 {
@@ -27,10 +29,14 @@ Vector2 NTGetTextWidthtx(Font used_font, int font_size, char *text)
         int codepointIndex = GetGlyphIndex(used_font, codepoint);
 
         if (used_font.glyphs[codepointIndex].advanceX == 0)
-            glyphWidth = (float) used_font.recs[codepointIndex].width * scaleFactor + padding;
+            glyphWidth =
+                (float) used_font.recs[codepointIndex].width * scaleFactor +
+                padding;
         /* (float) GuiGetStyle(DEFAULT, TEXT_SPACING) */
-        else 
-            glyphWidth = (float) used_font.glyphs[codepointIndex].advanceX * scaleFactor + padding;
+        else
+            glyphWidth = (float) used_font.glyphs[codepointIndex].advanceX *
+                             scaleFactor +
+                         padding;
 
 
         text_rect.x += glyphWidth;
@@ -41,7 +47,7 @@ Vector2 NTGetTextWidthtx(Font used_font, int font_size, char *text)
 
 Vector2 NTGetTextWidth(Font used_font, int font_size, char *text)
 {
-    return MeasureTextEx(used_font, text, font_size , 1); // last is padding of
+    return MeasureTextEx(used_font, text, font_size, 1);  // last is padding of
                                                           // text
 }
 
@@ -60,5 +66,23 @@ void NTDrawTexture(Texture2D texture, Rectangle pick_window, Rectangle dest)
 int NTGetRandomValue(int min, int max)
 {
     srand((unsigned) time(NULL));
-    return (rand() % (abs(max- min) + 1)) + min;
+    return (rand() % (abs(max - min) + 1)) + min;
+}
+
+
+Vector2 NTRect2Vector(Rectangle rect, R2VTYPE type)
+{
+    if (type == NTPOS) {
+        return (Vector2){.x = rect.x, .y = rect.y};
+    } else if (type == NTRECT) {
+        return (Vector2){.x = rect.width, .y = rect.height};
+    }
+}
+
+Vector2 NTGetRectPostion(Rectangle rect){
+    return NTRect2Vector(rect, NTPOS);
+}
+
+Vector2 NTGetRectWidthandHeight(Rectangle rect){
+    return NTRect2Vector(rect, NTRECT);
 }
