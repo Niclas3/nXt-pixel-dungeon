@@ -1,8 +1,10 @@
 #include "NTDebug.h"
 #include <switch.h>
-// void ShowLine(){
-//     DrawLine(but_dest.x, but_dest.y, but_dest.x+1000, but_dest.y, RED);
-// }
+void ShowLine(){
+    Vector2 v_start = (Vector2){.x= (2.0 / 3.0) * (float)GetScreenWidth(), .y=0};
+    Vector2 v_end   = (Vector2){.x= (2.0 / 3.0) * (float)GetScreenWidth(), .y=(float)GetScreenHeight()};
+    DrawLineEx( v_start,v_end, 4.0, BLACK);
+}
 
 void ShowRectInfo(Rectangle rect1)
 {
@@ -65,3 +67,11 @@ void ShowRuler(bool is_h)
         }
     }
 }
+
+void ShowStr(char* text)
+{
+    Vector2 t_Hw = MeasureTextEx(GetFontDefault(), text, 20, 2);
+    DrawRectangle(200, 560, t_Hw.x, t_Hw.y, ORANGE);
+    DrawText(text, 200, 560, 20, GREEN);
+}
+
