@@ -1,23 +1,8 @@
 #include "NTDungeon.h"
-#include <math.h>
-#include <raylib.h>
-#include <time.h>
 
 #include "NTDebug.h"
-#include "NTTools.h"
+#include "utils/NTTools.h"
 
-
-#define MAP_WIDTH 960
-#define MAP_HEIGHT 720
-/* #define MAP_WIDTH (960/5) */
-/* #define MAP_HEIGHT (720/5) */
-
-#define TILE_WIDTH (16)
-#define TILE_COLS MAP_WIDTH / TILE_WIDTH
-#define TILE_LINES MAP_HEIGHT / TILE_WIDTH
-
-#define MAX_CELL 10
-#define MIN_CELL 4
 
 void tileCreate(Vector2 vec, float width, Color color)
 {
@@ -26,10 +11,14 @@ void tileCreate(Vector2 vec, float width, Color color)
     DrawRectangleRec(rec, color);
 }
 
-void gridSystem()
+void gridSystem(int cols, int lines, bool setted)
 {
-    for (int i = 0; i < TILE_COLS; i++) {
-        for (int j = 0; j < TILE_LINES; j++) {
+    if (setted) {
+        cols = TILE_COLS;
+        lines = TILE_LINES;
+    }
+    for (int i = 0; i < cols; i++) {
+        for (int j = 0; j < lines; j++) {
             Vector2 vec = (Vector2){.x = i * TILE_WIDTH, .y = j * TILE_WIDTH};
             Color c = BLACK;
             if (i % 2 == 0) {
@@ -48,8 +37,12 @@ void gridSystem()
     }
 }
 
-// Cell is a group of tiles
-Vector2 CreateCells(int width, int height)
+/* @brief Cell is a group of tiles.
+ * @param width and height is number of tile.
+ * @return Vector2 type contains all lines and cols at map.
+ * @remark ...
+ */
+Vector2 NTCreateGridCells(int width, int height)
 {
     int cell_width = width + 1;
     int cell_height = height + 1;
@@ -57,6 +50,8 @@ Vector2 CreateCells(int width, int height)
     int cell_lines = TILE_LINES / cell_height;
     int cell_cols = TILE_COLS / cell_width;
 
+    // Visual version
+#ifdef VISUAL_MODE
     for (int x = 0; x < TILE_COLS; x++) {
         for (int y = 0; y < TILE_LINES; y++) {
             Vector2 vec = (Vector2){.x = x * TILE_WIDTH, .y = y * TILE_WIDTH};
@@ -68,35 +63,91 @@ Vector2 CreateCells(int width, int height)
             tileCreate(vec, TILE_WIDTH, c);
         }
     }
+#endif
 
     return (Vector2){.x = cell_cols, .y = cell_lines};
 }
 
-void SelectCell(Vector2 cell_pos, Vector2 cell_wh)
+
+Vector2 _cellId2Position(NTCell cell)
 {
-    int cell_width_px = cell_wh.x * TILE_WIDTH;
-    int cell_height_px = cell_wh.y * TILE_WIDTH;
+    int cell_width_px = cell.rect.x * TILE_WIDTH;
+    int cell_height_px = cell.rect.y * TILE_WIDTH;
 
-    int cell_pos_x = TILE_WIDTH + cell_pos.x * (cell_width_px + TILE_WIDTH);
-    int cell_pos_y = TILE_WIDTH + cell_pos.y * (cell_height_px + TILE_WIDTH);
-
-    DrawRectangle(cell_pos_x, cell_pos_y, cell_width_px, cell_height_px, RED);
+    int cell_pos_x =
+        TILE_WIDTH + cell.position.x * (cell_width_px + TILE_WIDTH);
+    int cell_pos_y =
+        TILE_WIDTH + cell.position.y * (cell_height_px + TILE_WIDTH);
+    return (Vector2){.x = cell_pos_x, .y = cell_pos_y};
 }
 
-void CreateDungeon()
+Rectangle NTCellToRect(NTCell cell)
 {
-    FloorTile tile[TILE_COLS][TILE_LINES] = {0};
-    int cell_width = 4;
-    int cell_height = 4;
-    Vector2 v_cells = CreateCells(cell_width, cell_height);
-    int rand_x;
-    int rand_y;
+    int cell_width_px = cell.rect.x * TILE_WIDTH;
+    int cell_height_px = cell.rect.y * TILE_WIDTH;
 
-    for (int j = 0; j < 20; j++) {
-        rand_x = GetRandomValue(0, (int) v_cells.x - 1);
-        rand_y = GetRandomValue(0, (int) v_cells.y - 1);
+    Vector2 cell_pos = _cellId2Position(cell);
 
-        SelectCell((Vector2){rand_x, rand_y},
-                   (Vector2){cell_width, cell_height});
+    return (Rectangle){.x = cell_pos.x,
+                       .y = cell_pos.y,
+                       .width = cell_width_px,
+                       .height = cell_height_px};
+}
+
+// Connect cell use actual px
+void NTConnectCells(NTCell start_cell, NTCell end_cell) {}
+
+void binary_tree_maze(NTUnit** units, int width, int height)
+{
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            NTUnit visited_unit = units[i][j];
+            if (j == (height - 1)){  // the last unit
+                visited_unit.east = true;
+                continue;
+            }
+            if (i == (width - 1)){
+                visited_unit.south = true;
+                continue;
+            }
+            // random select east side or south side
+            //               0            1
+            int side = NTGetRandomValue(0, 1);
+            if (side) {
+                visited_unit.south = true;
+            } else {
+                visited_unit.east = true;
+            }
+        }
     }
+}
+
+void NTPrintMaze(NTUnit** units, int width, int height){
+    NTUnit pre_unit;
+    for(int i = 0; i < width; i++){
+        for(int j = 0; j < height; j++){
+
+        }
+    }
+}
+
+void NTPrintDungeon(Rectangle *selected_cells, int cells_num)
+{
+    /* FloorTile tile[TILE_COLS][TILE_LINES] = {0}; */
+
+    gridSystem(17, 17, false);
+    NTUnit units[8][8];
+    binary_tree_maze(units, 8, 8);
+
+    /* for (int i = 0; i < cells_num; i++) { */
+    /*     int cell_pos_x = selected_cells[i].x; */
+    /*     int cell_pos_y = selected_cells[i].y; */
+    /*     int cell_width_px = selected_cells[i].width; */
+    /*     int cell_height_px = selected_cells[i].height; */
+    /*  */
+    /*     DrawRectangle(cell_pos_x, cell_pos_y, cell_width_px, cell_height_px,
+     * RED); */
+    /*     DrawText(TextFormat("%d",i), cell_pos_x, cell_pos_y,
+     * GetFontDefault().baseSize * 4, BLUE); */
+    /* } */
 }

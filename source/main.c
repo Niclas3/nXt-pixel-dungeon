@@ -2,14 +2,16 @@
 
 #include "raylib.h"
 
-#include "NTAssets.h"
-#include "NTButton.h"
-#include "NTDungeon.h"
-
 #include "NTDebug.h"
 
 #include "NTRectF.h"
-#include "NTTools.h"
+#include "utils/NTTools.h"
+
+#include "NTAssets.h"
+
+#include "NTButton.h"
+#include "NTDungeon.h"
+#include "NTEvent.h"
 #include "config.h"
 
 typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY, ENDING } GameScreen;
@@ -107,11 +109,38 @@ int main(void)
     int x = 0;
     int y = 0;
     int rate = 10;
-    int xstep = 12;
-    int ystep = 15;
+    int xstep = TILE_WIDTH;
+    int ystep = TILE_WIDTH;
 
     // Count frames
     int frame_count = 0;
+    // Generate dungeon
+
+    /* int cell_width = 4; */
+    /* int cell_height = 4; */
+
+    int cell_width = 4;
+    int cell_height = 6;
+
+    Vector2 v_cells = NTCreateGridCells(cell_width, cell_height);
+
+    int cells_num = 20;
+    Rectangle selected_cells[cells_num];
+    // BUGS: If random value clashed.
+    for (int j = 0; j < cells_num; j++) {
+        int rand_x = GetRandomValue(0, (int) v_cells.x - 1);
+        int rand_y = GetRandomValue(0, (int) v_cells.y - 1);
+
+        NTCell cell = (NTCell){.position = (Vector2){rand_x, rand_y},
+                               .rect = (Vector2){cell_width, cell_height}};
+
+        selected_cells[j] = NTCellToRect(cell);
+    }
+
+    Vector2 pos1 = NTGetRectPostion(selected_cells[0]);
+    Vector2 pos2 = NTGetRectPostion(selected_cells[1]);
+
+    /* NTConnectCells(pos1, pos2); */
 
     // Main game loop
     while (!WindowShouldClose())  // Detect window close button or ESC key
@@ -124,27 +153,26 @@ int main(void)
         frame_count++;
 
         padUpdate(&pad);
-        u64 kDown = padGetButtonsDown(&pad);
+
+        // 0 left / 1 right
+        HidAnalogStickState stick_state = padGetStickPos(&pad, 0);
+
+        u64 kDown = padGetButtonsDown(&pad);  // press consistant
         if (kDown & HidNpadButton_Plus) {
             break;
         }
 
-        if (kDown & HidNpadButton_Right) {
-            x += xstep;
-        } else if (kDown & HidNpadButton_Down) {
-            y += ystep;
-        } else if (kDown & HidNpadButton_Left) {
-            x -= xstep;
-        } else if (kDown & HidNpadButton_Up) {
-            y -= ystep;
-            StopMusicStream(theme1);
-        }
-
-        if (frame_count % 10 == 0) {
-            x += xstep;
-        }
-        if (x >= 7 * xstep) {
-            x = 0;
+        if (frame_count % 1 == 0) {
+            if (kDown & HidNpadButton_Right) {
+                x += xstep;
+            } else if (kDown & HidNpadButton_Down) {
+                y += ystep;
+            } else if (kDown & HidNpadButton_Left) {
+                x -= xstep;
+            } else if (kDown & HidNpadButton_Up) {
+                y -= ystep;
+                StopMusicStream(theme1);
+            }
         }
 
         switch (current_screen) {
@@ -192,9 +220,9 @@ int main(void)
 
         // Init texture at while for
         Texture2D background =
-            LoadTexture("romfs:/assets/interfaces/arcs1.png");
+            LoadTexture(NTGetAssertPath(asset_interfaces.ARCS_BG));
         Texture2D foreground =
-            LoadTexture("romfs:/assets/interfaces/arcs2.png");
+            LoadTexture(NTGetAssertPath(asset_interfaces.ARCS_FG));
 
         // Draw
         //----------------------------------------------------------------------------------
@@ -206,13 +234,10 @@ int main(void)
             // TODO: Draw LOGO screen here!
             DrawText("LOGO SCREEN", 20, 20, 40, LIGHTGRAY);
             DrawText("WAIT for 2 SECONDS...", 290, 220, 20, GRAY);
-            CreateDungeon();
 
-            /* Vector2 v_start = (Vector2){.x= (2.0 / 3.0) * (float)GetScreenWidth(), .y=0}; */
-            /* Vector2 v_end   = (Vector2){.x= (2.0 / 3.0) * (float)GetScreenWidth(), .y=(float)GetScreenHeight()}; */
-            /* DrawLineEx( v_start,v_end, 4.0, BLACK); */
-            /* DrawTexture(swers_cell, 200, 200, WHITE); */
+            NTPrintDungeon(selected_cells, cells_num);
 
+            DrawRectangle(x, y, TILE_WIDTH, TILE_WIDTH, BLUE);
         } break;
         case TITLE: {
             // TODO: Draw TITLE screen here!
@@ -226,9 +251,10 @@ int main(void)
         case GAMEPLAY: {
             // TODO: Draw GAMEPLAY screen here!
             /* DrawRectangle(0, 0, screenWidth, screenHeight, PURPLE); */
-            CreateDungeon();
+            /* NTCreateDungeon(); */
             /* DrawText("GAMEPLAY SCREEN", 20, 20, 40, MAROON); */
-            /* DrawText("PRESS ENTER or TAP to JUMP to ENDING SCREEN", 130, 220, */
+            /* DrawText("PRESS ENTER or TAP to JUMP to ENDING SCREEN", 130, 220,
+             */
             /*          20, MAROON); */
         } break;
         case ENDING: {

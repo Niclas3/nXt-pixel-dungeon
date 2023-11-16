@@ -1,7 +1,6 @@
 #include "NTButton.h"
 #include <stdlib.h>
-#include "NTDebug.h"
-#include "NTTools.h"
+#include "utils/NTTools.h"
 
 NTButton *initButtonWith(Texture2D skin,
                          Texture2D icon,
